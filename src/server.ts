@@ -29,6 +29,16 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
+  app.get('/filteredimage?image_url=:URL', async (req, res) => {
+    const url = req.params.URL;
+
+    if (!url) {
+      res.status(400).send('Image url must be provided!');
+    }
+
+    
+  });
+  
   //! END @TODO1
   
   // Root Endpoint

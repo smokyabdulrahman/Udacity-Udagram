@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { filterImage, deleteLocalFiles } from './util/util';
+import { Magic, MAGIC_MIME_TYPE } from 'mmmagic';
+import Jimp from 'jimp';
 
 (async () => {
 
@@ -9,7 +11,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   // Set the network port
   const port = process.env.PORT || 8082;
-  
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -29,28 +31,37 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
-  app.get('/filteredimage?image_url=:URL', async (req, res) => {
-    const url = req.params.URL;
-
+  app.get('/filteredimage', async (req, res) => {
+    const url = req.query.image_url;
+    
     if (!url) {
       res.status(400).send('Image url must be provided!');
     }
 
+    const fileFromUrl = await Jimp.read(url);
+    const fileMIME = fileFromUrl.getMIME();
+
+    console.log("what? ", fileMIME.includes('image'));
     
+    if (!fileMIME.includes('image')) {
+      res.status(400).send('Url does not contain an image!');
+    }
+
+    res.status(200).sendFile(await filterImage(fileFromUrl));
   });
-  
+
   //! END @TODO1
-  
+
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
+  app.get("/", async (req, res) => {
     res.send("try GET /filteredimage?image_url={{}}")
-  } );
-  
+  });
+
 
   // Start the Server
-  app.listen( port, () => {
-      console.log( `server running http://localhost:${ port }` );
-      console.log( `press CTRL+C to stop server` );
-  } );
+  app.listen(port, () => {
+    console.log(`server running http://localhost:${port}`);
+    console.log(`press CTRL+C to stop server`);
+  });
 })();

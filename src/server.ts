@@ -32,22 +32,27 @@ import Jimp from 'jimp';
   /**************************************************************************** */
 
   app.get('/filteredimage', async (req, res) => {
-    const url = req.query.image_url;
+    const url: string = req.query.image_url;
     
     if (!url) {
-      res.status(400).send('Image url must be provided!');
+      return res.status(400).send('Image url must be provided!');
+    }
+
+    const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+    const regex = new RegExp(expression);
+
+    if (!url.match(regex)) {
+      return res.status(400).send('Url is not valid!');
     }
 
     const fileFromUrl = await Jimp.read(url);
     const fileMIME = fileFromUrl.getMIME();
-
-    console.log("what? ", fileMIME.includes('image'));
     
     if (!fileMIME.includes('image')) {
-      res.status(400).send('Url does not contain an image!');
+      return res.status(400).send('Url does not contain an image!');
     }
 
-    res.status(200).sendFile(await filterImage(fileFromUrl));
+    return res.status(200).sendFile(await filterImage(fileFromUrl));
   });
 
   //! END @TODO1

@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@types/mmmagic": "^0.4.29",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "jimp": "^0.6.4"
   }
 }
